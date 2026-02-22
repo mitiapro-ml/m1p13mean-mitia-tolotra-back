@@ -27,6 +27,9 @@ app.get('/', (req, res) => {
     res.json({ message: "API Mitia & Tolotra opérationnelle !" });
 });
 
+// Admin route
+app.use('/api/admin', require('./routes/adminRoutes'));
+
 // Port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

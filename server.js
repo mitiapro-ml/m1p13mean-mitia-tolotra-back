@@ -32,3 +32,10 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(` Serveur lancé sur http://localhost:${PORT}`);
 });
+
+//boutique et catégorie
+const shopRoutes = require('./routes/shopRoutes');
+const categoryRoutes = require('./routes/categoryRoutes'); // À créer sur le même modèle
+
+app.use('/api/shops', shopRoutes);
+app.use('/api/categories', categoryRoutes);

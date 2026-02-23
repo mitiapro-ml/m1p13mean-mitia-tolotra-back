@@ -25,6 +25,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log("Login attempt:", email, password); // Debug log
 
         // 1. Vérifier si l'utilisateur existe
         const user = await User.findOne({ email });
@@ -40,12 +41,13 @@ exports.login = async (req, res) => {
             process.env.JWT_SECRET, 
             { expiresIn: '1d' } 
         );
-
+        console.log("Login success  ==========="); // Debug log
         res.status(200).json({
             token,
-            user: { id: user._id, nom: user.nom, role: user.role }
+            user: { id: user._id, email: user.email, nom: user.nom, prenom: user.prenom, role: user.role }
         });
     } catch (error) {
+        console.error("Login error:", error); // Debug log
         res.status(500).json({ message: "Erreur connexion", error });
     }
 };

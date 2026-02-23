@@ -1,15 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const catCtrl = require('../controllers/categoryController');
-const auth = require('../middleware/authMiddleware');
-const admin = require('../middleware/adminMiddleware');
 
+const { authMiddleware } = require('../middleware/authMiddleware');
+const adminMiddleware = require('../middleware/adminMiddleware');
+
+// Public
 router.get('/shop-list', catCtrl.getShopCategories);
 
-router.post('/create', auth, catCtrl.createCategory);
+// Privé 
+router.post('/create', authMiddleware, catCtrl.createCategory);
 
-// Admin : les validations
-router.get('/pending', auth, admin, catCtrl.getPendingCategories);
-router.post('/decide/:id', auth, admin, catCtrl.decideCategory);
+// Admin (Utilise authMiddleware ET adminMiddleware)
+router.get('/pending', authMiddleware, adminMiddleware, catCtrl.getPendingCategories);
+router.post('/decide/:id', authMiddleware, adminMiddleware, catCtrl.decideCategory);
 
 module.exports = router;

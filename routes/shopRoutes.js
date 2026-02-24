@@ -10,4 +10,7 @@ router.get('/', shopCtrl.getAllShops);
 router.post('/create', authMiddleware, shopCtrl.createShop);
 router.get('/my-shops', authMiddleware, shopCtrl.getMyShops);
 
+router.post('/:shopId/add-product', authMiddleware, shopCtrl.addProduct);
+router.get('/:shopId/products', authMiddleware, shopCtrl.getShopProducts);
+
 module.exports = router;

@@ -6,3 +6,5 @@ test admin ito
     "email": "admin@akoor.mg",
     "password": "admin123",
 }
+
+npm install cors 

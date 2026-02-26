@@ -12,11 +12,20 @@ exports.authMiddleware = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
-       
-        req.user = decoded;
+        // On stocke les infos décodées (id, role, etc.) dans req.user
+        req.user = decoded; 
         
         next(); 
     } catch (error) {
         res.status(401).json({ message: "Token non valide ou expiré" });
+    }
+};
+
+exports.adminCheck = (req, res, next) => {
+    // On vérifie bien req.user (le même nom que plus haut)
+    if (req.user && req.user.role === 'admin') {
+        next(); 
+    } else {
+        res.status(403).json({ message: "Accès refusé : Réservé aux administrateurs" });
     }
 };

@@ -10,7 +10,8 @@ router.get('/', shopCtrl.getAllShops);
 router.post('/create', authMiddleware, shopCtrl.createShop);
 router.get('/my-shops', authMiddleware, shopCtrl.getMyShops);
 
-router.post('/:shopId/add-product', authMiddleware, shopCtrl.addProduct);
+const multer = require('../middleware/multer-config');  
+router.post('/:shopId/add-product', authMiddleware, multer, shopCtrl.addProduct);
 router.get('/:shopId/products', authMiddleware, shopCtrl.getShopProducts);
 
 module.exports = router;

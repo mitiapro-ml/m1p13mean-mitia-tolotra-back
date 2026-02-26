@@ -49,30 +49,37 @@ exports.getMyShops = async (req, res) => {
 exports.addProduct = async (req, res) => {
     try {
         const { shopId } = req.params;
-        const { nom, description, prix, poid, image } = req.body;
+        
         const shop = await Shop.findById(shopId);
-
         if (!shop) {
             return res.status(404).json({ message: "Boutique non trouvée" });
         }
+
         if (shop.owner.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(403).json({ message: "Vous n'êtes pas autorisé à ajouter des produits à cette boutique" });
+            return res.status(403).json({ message: "Non autorisé" });
         }
+
+        const { nom, description, prix, poid } = req.body;
+
+        const imageUrl = req.file 
+            ? `${req.protocol}://${req.get('host')}/images/${req.file.filename}` 
+            : "";
 
         const newProduct = new Product({
             nom,
             description,
             prix,
             shop: shopId,
-            image: image == undefined ? "" : image,
-            poid: poid == undefined ? 0 : poid,
+            image: imageUrl, // Utilise l'URL générée
+            poid: poid || 0, 
         });
 
         await newProduct.save();
         res.status(201).json({ message: "Produit ajouté avec succès", product: newProduct });
+
     } catch (error) {
         console.error("Error adding product:", error); 
-        res.status(500).json({ message: "Erreur serveur", error });
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
     }
 };
 

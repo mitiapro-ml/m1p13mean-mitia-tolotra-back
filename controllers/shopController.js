@@ -59,7 +59,7 @@ exports.addProduct = async (req, res) => {
             return res.status(403).json({ message: "Non autorisé" });
         }
 
-        const { nom, description, prix, poid } = req.body;
+        const { nom, description, prix, poid, isStockable, stock } = req.body;
 
         const imageUrl = req.file 
             ? `${req.protocol}://${req.get('host')}/images/${req.file.filename}` 
@@ -70,19 +70,28 @@ exports.addProduct = async (req, res) => {
             description,
             prix,
             shop: shopId,
-            image: imageUrl, // Utilise l'URL générée
-            poid: poid || 0, 
+            image: imageUrl,
+            poid: poid || 0,
+            
+            isStockable: isStockable === 'true' || isStockable === true, 
+            
+            stock: (isStockable === 'true' || isStockable === true) ? (stock || 0) : 0,
+            
+            manualAvailability: true 
         });
 
         await newProduct.save();
-        res.status(201).json({ message: "Produit ajouté avec succès", product: newProduct });
+        
+        res.status(201).json({ 
+            message: "Produit ajouté avec succès", 
+            product: newProduct 
+        });
 
     } catch (error) {
         console.error("Error adding product:", error); 
         res.status(500).json({ message: "Erreur serveur", error: error.message });
     }
 };
-
 exports.getShopProducts = async (req, res) => {
     try {
         const { shopId } = req.params;

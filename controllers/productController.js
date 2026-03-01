@@ -166,3 +166,38 @@ exports.getRecentProducts = async (req, res) => {
         });
     }
 };
+
+//quand on va clique sue dispo ou indispo  par la boutique 
+exports.toggleAvailability = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // 1. Trouver le produit
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).json({ message: "Produit non trouvé" });
+        }
+
+        // 2. Vérification de sécurité 
+        // On récupère la boutique pour vérifier l'owner
+        const shop = await Shop.findById(product.shop);
+        if (shop.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: "Action non autorisée" });
+        }
+
+        // 3. Inverser l'état manuel (!true devient false, !false devient true)
+        product.manualAvailability = !product.manualAvailability;
+
+        // 4. Sauvegarder
+        await product.save();
+
+        res.status(200).json({ 
+            message: `Le produit est maintenant ${product.manualAvailability ? 'disponible' : 'indisponible'}`, 
+            manualAvailability: product.manualAvailability,
+            isAvailable: product.isAvailable // On renvoie le virtual pour que le Front se mette à jour
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+};

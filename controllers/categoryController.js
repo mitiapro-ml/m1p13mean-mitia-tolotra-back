@@ -60,3 +60,34 @@ exports.decideCategory = async (req, res) => {
         res.status(500).json({ message: "Erreur de décision", error });
     }
 };
+
+exports.updateCategory = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nom, type } = req.body;
+        const updatedCat = await Category.findByIdAndUpdate(
+            id, 
+            { nom, type, isValidated: false }, // Remet à false pour re-validation
+            { new: true }
+        );  
+        if (!updatedCat) {
+            return res.status(404).json({ message: "Catégorie non trouvée" });
+        }
+        res.status(200).json({ message: "Catégorie mise à jour, en attente de validation", category: updatedCat });
+    } catch (error) {
+        res.status(500).json({ message: "Erreur lors de la mise à jour", error });
+    }
+};
+
+exports.deleteCategory = async (req, res) => {
+    try {   
+        const { id } = req.params;
+        const deletedCat = await Category.findByIdAndDelete(id);
+        if (!deletedCat) {
+            return res.status(404).json({ message: "Catégorie non trouvée" });
+        }
+        res.status(200).json({ message: "Catégorie supprimée avec succès !" });
+    } catch (error) {
+        res.status(500).json({ message: "Erreur lors de la suppression", error });
+    }
+};

@@ -11,6 +11,7 @@ const shopRoutes = require('./routes/shopRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const productRoutes = require('./routes/productRoutes'); 
 const statsRoutes = require('./routes/statsRoutes');     
+const bookingRoutes = require('./routes/bookingRoutes');
 
 const app = express();
 
@@ -35,6 +36,10 @@ app.use('/api/products', productRoutes);
 app.use('/api/stats', statsRoutes);
 //app.use('/api/users', userRoutes);
 app.use('/api/admin', adminsRoutes);
+app.use('/api/bookings', bookingRoutes);
+
+// ---  SERVICE DE GESTION DES EXPIRATIONS ---
+require('./services/expirationServices');
 
 // Route de base
 app.get('/', (req, res) => {

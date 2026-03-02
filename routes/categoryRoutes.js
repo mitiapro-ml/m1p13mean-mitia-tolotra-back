@@ -15,4 +15,7 @@ router.post('/create', authMiddleware, catCtrl.createCategory);
 router.get('/pending', authMiddleware, adminMiddleware, catCtrl.getPendingCategories);
 router.post('/decide/:id', authMiddleware, adminMiddleware, catCtrl.decideCategory);
 
+router.put('/:id', authMiddleware, adminMiddleware, catCtrl.updateCategory);
+router.delete('/:id', authMiddleware, adminMiddleware, catCtrl.deleteCategory);
+
 module.exports = router;

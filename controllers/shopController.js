@@ -166,3 +166,103 @@ exports.getShopTop5Products = async (req, res) => {
         res.status(500).json({ message: "Erreur serveur", error });
     }
 };
+
+exports.updateShop = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nom, description, categorie } = req.body; 
+
+        const shop = await Shop.findById(id);
+        if (!shop) {
+            return res.status(404).json({ message: "Boutique non trouvée" });
+        }
+
+        if (shop.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: "Non autorisé" });
+        }
+
+        if (categorie) {
+            const categoryExists = await Category.findById(categorie);
+            if (!categoryExists) {
+                return res.status(404).json({ message: "Catégorie invalide" });
+            }
+            shop.categorie = categorie;
+        }
+
+        // Mise à jour des autres champs
+        if (nom) shop.nom = nom;
+        if (description) shop.description = description;
+
+        await shop.save();
+
+        // On renvoie la boutique mise à jour avec les infos de la catégorie
+        const updatedShop = await Shop.findById(id).populate('categorie', 'nom');
+
+        res.status(200).json({ 
+            message: "Boutique mise à jour avec succès", 
+            shop: updatedShop 
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: "Erreur lors de la mise à jour", error: error.message });
+    }
+};
+
+exports.deleteShop = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const shop = await Shop.findById(id);
+        if (!shop) {
+            return res.status(404).json({ message: "Boutique non trouvée" });
+        }
+
+        // Sécurité : Seul le propriétaire ou l'admin peut supprimer
+        if (shop.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: "Action non autorisée" });
+        }
+
+        // 1. Suppression en cascade : on retire tous les produits de cette boutique
+        await Product.deleteMany({ shop: id });
+
+        // 2. Suppression de la boutique
+        await Shop.findByIdAndDelete(id);
+
+        res.status(200).json({ 
+            message: "La boutique et tous ses produits ont été supprimés avec succès." 
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: "Erreur lors de la suppression", error: error.message });
+    }
+};
+// --- ADMIN : Activer ou Bannir une boutique ---
+exports.activateShopByAdmin = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // 1. Vérification stricte du rôle Admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ 
+                message: "Accès refusé. Seul un administrateur peut valider une boutique." 
+            });
+        }
+
+        const shop = await Shop.findById(id);
+        if (!shop) {
+            return res.status(404).json({ message: "Boutique introuvable" });
+        }
+
+        // 2. Inversion du statut (Validation/Activation)
+        shop.isActive = !shop.isActive;
+        await shop.save();
+
+        res.status(200).json({ 
+            message: `Le statut de la boutique ${shop.nom} a été mis à jour par l'admin.`, 
+            isActive: shop.isActive 
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: "Erreur serveur lors de la modération", error: error.message });
+    }
+};

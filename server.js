@@ -24,7 +24,8 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // ---  CONNEXION MONGODB ---
 const mongoURI = process.env.DATABASE_URL || 'mongodb://127.0.0.1:27017/m1p13mean-db';
-mongoose.connect(mongoURI)
+mongoose.connect(mongoURI, {
+    bufferCommands: false })
     .then(() => console.log('Connecté à MongoDB'))
     .catch(err => console.error(' Erreur de connexion MongoDB:', err));
 

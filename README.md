@@ -76,7 +76,7 @@ Create a `.env` file in the root directory with the following variables:
 # Database Configuration
 DATABASE_URL=mongodb://127.0.0.1:27017/m1p13mean-db
 # Or for MongoDB Atlas:
-# DATABASE_URL=mongodb+srv://username:password@cluster.mongodb.net/m1p13mean-db
+# DATABASE_URL=url
 
 # JWT Configuration
 JWT_SECRET=your_jwt_secret_key_here

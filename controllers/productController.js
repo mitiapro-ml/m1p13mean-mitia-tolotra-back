@@ -90,8 +90,8 @@ exports.updateProduct = async (req, res) => {
                     if (err) console.log("Erreur lors de la suppression de l'ancienne image:", err);
                 });
             }
-
-            updates.image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+            updates.image = req.file.path;
+            // updates.image = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
         }
 
         delete updates.shop;
@@ -171,22 +171,25 @@ exports.getRecentProducts = async (req, res) => {
 exports.toggleAvailability = async (req, res) => {
     try {
         const { id } = req.params;
-
+        
         // 1. Trouver le produit
-        const product = await Product.findById(id);
+        const product = await Product.findById(id).populate('shop');
         if (!product) {
             return res.status(404).json({ message: "Produit non trouvé" });
         }
-
+        
         // 2. Vérification de sécurité 
         // On récupère la boutique pour vérifier l'owner
-        const shop = await Shop.findById(product.shop);
+        console.log('Product found:', product.shop.id); // Debug : Vérifier que le produit est bien récupéré
+        const shop = product.shop;
+        // console.log('Shop found for product:', shop); // Debug : Vérifier que la boutique est bien récupérée
         if (shop.owner.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ message: "Action non autorisée" });
         }
 
         // 3. Inverser l'état manuel (!true devient false, !false devient true)
         product.manualAvailability = !product.manualAvailability;
+        // product.isAvailable = !product.isAvailable; // On inverse la disponibilité réelle du produit
 
         // 4. Sauvegarder
         await product.save();

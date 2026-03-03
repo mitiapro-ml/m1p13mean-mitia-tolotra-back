@@ -69,8 +69,8 @@ exports.createBooking = async (req, res) => {
 // --- CLIENT : Mes réservations ---
 exports.getUserBookings = async (req, res) => {
     try {
-        const bookings = await Booking.find({ user: req.user.userId }).populate('shop', 'name');
-        res.json(bookings);
+        const bookings = await Booking.find({ user: req.user.id , status: 'pending' }).populate('shop', 'nom');
+        res.status(200).json(bookings);
     } catch (error) { res.status(500).json(error); }
 };
 
@@ -86,4 +86,23 @@ exports.validatePickup = async (req, res) => {
         if (!booking) return res.status(404).json({ message: "Code invalide ou déjà utilisé" });
         res.json({ message: "Retrait validé avec succès !", booking });
     } catch (error) { res.status(500).json(error); }
+};
+
+// --- BOUTIQUE : Liste des réservations de sa boutique ---
+exports.getShopBookings = async (req, res) => {
+    try {
+        const { shopId } = req.params;
+        const Shop = require('../models/Shop');
+        const shop = await Shop.findById(shopId);
+        if (!shop) return res.status(404).json({ message: "Boutique introuvable" });
+        if (shop.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: "Non autorisé" });
+        }
+        const bookings = await Booking.find({ shop: shopId })
+            .populate('user', 'nom prenom email')
+            .sort({ createdAt: -1 });
+        res.json(bookings);
+    } catch (error) {
+        res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
 };

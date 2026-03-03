@@ -254,12 +254,12 @@ exports.activateShopByAdmin = async (req, res) => {
         }
 
         // 2. Inversion du statut (Validation/Activation)
-        shop.isActive = !shop.isActive;
+        shop.isActivated = !shop.isActivated;
         await shop.save();
 
         res.status(200).json({ 
             message: `Le statut de la boutique ${shop.nom} a été mis à jour par l'admin.`, 
-            isActive: shop.isActive 
+            isActivated: shop.isActivated 
         });
 
     } catch (error) {

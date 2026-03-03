@@ -24,9 +24,25 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // ---  CONNEXION MONGODB ---
 const mongoURI = process.env.DATABASE_URL || 'mongodb://127.0.0.1:27017/m1p13mean-db';
-mongoose.connect(mongoURI)
-    .then(() => console.log('Connecté à MongoDB'))
-    .catch(err => console.error(' Erreur de connexion MongoDB:', err));
+// mongoose.connect(mongoURI)
+//     .then(() => console.log('Connecté à MongoDB'))
+//     .catch(err => console.error(' Erreur de connexion MongoDB:', err));
+// Connexion optimisée pour serverless
+let isConnected = false;
+
+const connectDB = async () => {
+    if (isConnected) return;
+    
+    await mongoose.connect(mongoURI, {
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 10000,
+    });
+    
+    isConnected = true;
+    console.log('Connecté à MongoDB');
+};
+
+connectDB().catch(err => console.error('Erreur MongoDB:', err));
 
 // ---  ROUTES ---
 app.use('/api/auth', authRoutes);
